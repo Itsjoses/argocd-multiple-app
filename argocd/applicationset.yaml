@@ -1,0 +1,42 @@
+# Ganti YOUR_ORG/YOUR_REPO — repoURL harus sama di template.spec.source.
+# Tambah app di list project; tambah env di list env (matrix = cartesian product).
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: apps-from-overlays
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+    - matrix:
+        generators:
+          - list:
+              elements:
+                - app: nginx
+                - app: podinfo
+                - app: mysql
+          - list:
+              elements:
+                - env: development
+                  namespace: argocd-dev
+                - env: production
+                  namespace: argocd-prod
+  template:
+    metadata:
+      # nginx + development -> nginx-development
+      name: "{{ .app }}-{{ .env }}"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/YOUR_ORG/YOUR_REPO.git
+        targetRevision: HEAD
+        path: "{{ .app }}/overlays/{{ .env }}"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{ .namespace }}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
