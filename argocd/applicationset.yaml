@@ -28,7 +28,7 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://github.com/YOUR_ORG/YOUR_REPO.git
+        repoURL: https://github.com/Itsjoses/argocd-multiple-app.git
         targetRevision: HEAD
         path: "{{ .app }}/overlays/{{ .env }}"
       destination:
